@@ -2,10 +2,11 @@
 const { When, Then, Given } = require('@cucumber/cucumber');
 const YAML = require('yaml');
 const { Login } = require("../../src/PO/login.po");
-const { CustomPage } = require("../../src/PO/custom_page.po");
+const { ListOfUsers } = require("../../src/PO/custom_page.po");
 const { CustomPage2 } = require("../../src/PO/custom_page_2.po");
 const { Table } = require("../../src/PO/tables/table.po");
-const Subscribe = require('../../src/PO/forms/subscribe.model');
+const User = require('../../src/PO/user.model');
+const { Base } = require('../../src/PO/base.po');
 
 When(/^I go to "([^"]*)"$/, async function (url) {
     await browser.url(url);
@@ -28,13 +29,24 @@ When(/^I expect element: "([^"]*)" (text|value): "([^"]*)"$/, async function (se
         .toEqual(text)
 });
 
-When('I go to {string} menu item', function (item) {
-    // add implementation here
+When('I click the {string} menu item', async function (item) {
+    const page = new Base;
+    await page.clickMenuItem(item);
 });
-
 
 When('I login as: {string}, {string}', async function (login, password) {
     await Login.login({ username: login, password: password });
+});
+
+When('I enter credentials:', async function (table) {
+    const rows = table.hashes();
+    for (const row of rows) {
+        await Login.login({ username: row.login, password: row.password });
+    }
+});
+
+Then('{string} message appears', async function (message) {
+    expect(await $('#error').getText()).toEqual(message);
 });
 
 async function invokeMethodOnPo(action, pretext, po, element, parameters) {
@@ -67,17 +79,23 @@ When(/^I sort table by "([^"]*)"$/, async function (name) {
     const head = await (await Table.headers()).filter(item => item.name === name)[0].element.click();
     console.log({ head });
     console.log({ data })
-    // console.log(JSON.stringify(data));
 });
 
 
 When(/^I fill form:$/, async function (formYaml) {
     const formData = YAML.parse(formYaml);
-    console.log({ formData });
-    console.log(Subscribe.model)
-    for (const elModel of Subscribe.model) {
+    for (const elModel of User.model) {
         const el = new elModel.type(elModel.selector);
         await el.set(formData[elModel.name]);
         await browser.pause(200);
     }
+});
+
+When('I click the {string} button', async function (button) {
+    await $(`button*=${button}`).click();
+})
+
+Then('I see the list of users', async function () {
+    const pathToListOfUsers = 'Users.html';
+    await expect(browser).toHaveUrlContaining(pathToListOfUsers);
 });

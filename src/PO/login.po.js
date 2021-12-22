@@ -25,7 +25,6 @@ class Login {
         await this.username.setValue(credentials.username);
         await this.password.setValue(credentials.password);
         await this.submitButton.click();
-        await $('#user-label').waitForDisplayed({timeoutMsg: 'cannot login into system'});
     }
 }
 

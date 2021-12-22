@@ -1,10 +1,10 @@
 // custom_page.po.js
 const { Base } = require('./base.po')
 
-class CustomPage extends Base {
-    get sidebar() {
-        return $('#sidebarMenu')
+class ListOfUsers extends Base {
+    get listOfUsers() {
+        return $('#users-table')
     }
 }
 
-module.exports = { CustomPage: new CustomPage() };
+module.exports = { ListOfUsers: new ListOfUsers() };
